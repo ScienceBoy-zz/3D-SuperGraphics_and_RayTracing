@@ -1,0 +1,426 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Cool 3D Graphics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<canvas id="Canvas" style="width:100%; height:80%; border:0px;" tabindex='1'>
+			Unfortunately, your browser does not support the canvas element. Please use another, more modern web browser 
+		</canvas>
+		<script src="3D_SuperGraphics_Functions.js"></script> 
+		<script> 
+			var canvas = document.getElementById("Canvas"); 
+			var rect = canvas.getBoundingClientRect(); 
+			canvas.width = rect.width; 
+			canvas.height = rect.height; 
+			var DrawingContext = canvas.getContext("2d"); 
+			DrawingContext.scale(1, 1); 
+
+			var KeyPressed = 0; 
+			var mousePos; 
+			var NumberOfPoints = 0; 
+			var oldx = 0; 
+			var oldy = 0; 
+			var oldkoorx = 0; 
+			var oldkoory = 0;
+			
+			var MaxNumberOfPoints = 100; 
+			var MaxNbOfRotSegments  = 360;
+			
+			var PointCoordinatesArray = new Array2D(MaxNumberOfPoints, 3); 
+			var OriginPointCoords = new Array3D(MaxNbOfRotSegments, MaxNumberOfPoints, 3); 
+			var Points = new Array3D(MaxNbOfRotSegments , MaxNumberOfPoints, 3);
+			
+			var maxarea = MaxNumberOfPoints * MaxNbOfRotSegments;
+			var Area = new Array3D(maxarea, 4, 3);
+			var AreaIndex = 0;
+			
+			var AreaZValues = new Array1D(maxarea); 
+			var AreaOrderIndex = new Array1D(maxarea);
+			
+			var width = canvas.width; 
+			var height = canvas.height;
+			
+			var GradFromRad = 1/(2*Math.PI)*360;
+			
+			var LightSourceX = 500; 
+			var LightSourceY = 1000; 
+			var LightSourceZ = -1000;			
+			
+			var TotalEnteredPoints = 0;
+			var NumberOfRotationSegments = 60;
+			
+			var Perspective = 0;
+		
+			var DrawingMethod = 0;
+		
+			var AngleX = 0; // Rotation angle around X-axis 
+			var AngleY = 0; 
+			var AngleZ = 0;
+			
+			var NumberOfRotationsX = 0; 
+			var NumberOfRotationsY = 0; 
+			var NumberOfRotationsZ = 0; 
+			var increment = 3; 
+			
+			var Resolution = 7;
+			
+			var PartOfDirectLight = 0.4;
+			var PartOfReflectlight = 0.3;
+			var PartOfRefractionlight = 0.3;
+			var PartSurrounding       = 0.0;
+			
+			var ColorOfObject = {Red:0/255, Green:255/255, Blue:50/255,};
+			var ColorOfLightSource = {Red:255/255, Green:255/255, Blue:255/255,};
+			
+			var docTitle = 0;
+			
+			var RefractiveIndexOfMaterial = 1.5; //Quartz = 1.46 / Window Glass = 1.54 / Air = 1.00 / Water = 1.33 / Diamond = 2.42
+			var SurfaceStructur = 20; 
+			
+			EnterNewPoints();  
+			 
+			//RayTracing();
+			
+			function RayTracing() 
+			{ 
+				for (x = -width/2; x < width/2; x = x + Resolution) 
+				{ 
+					for (y = -height/2; y < height/2; y = y + Resolution) 
+					{
+						CalculatePixel(x,y);
+					}
+				}
+			}
+
+			function CalculatePixel(x,y)
+			{
+				setTimeout(function() {
+					if (docTitle < parseInt(100/width*((x-Resolution)+width/2)))
+					{
+						docTitle = parseInt(100/width*((x-Resolution)+width/2));
+						document.title = docTitle+"%";
+					}
+					var OriginX = x;    var OriginY = y;    var OriginZ = -10000; 
+					var TargetX = x;    var TargetY = y;    var TargetZ = 10000;
+					var DirectionX = TargetX - OriginX; var DirectionY = TargetY - OriginY; var DirectionZ = TargetZ - OriginZ;
+					var ColorOfPoint = CalculateColorOfPointByRayTracing(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ, 0, 1.0); 
+					drawBox(width/2-x,height/2-y,width/2-x+Resolution,height/2-y+Resolution,1,DrawingContext,"rgb("+ColorOfPoint.Red*255+", "+ColorOfPoint.Green*255+", "+ColorOfPoint.Blue*255+")",true); 
+				},0);
+			}
+
+			
+			function CalculateColorOfPointByRayTracing(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ, RecursionDepth, RefractiveIndexInCurrentMedium) 
+			{ 
+				var AreaHitByLightRay = HitObjectByLightRay(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ); 
+				if (AreaHitByLightRay.ObjectNo >= 0 && RecursionDepth < 10)  
+				{
+					var ShadowCheckRayOriginX = AreaHitByLightRay.IntersectionPointX; 
+					var ShadowCheckRayOriginY = AreaHitByLightRay.IntersectionPointY; 
+					var ShadowCheckRayOriginZ = AreaHitByLightRay.IntersectionPointZ;
+					var ShadowCheckRayDirectionX = (LightSourceX - ShadowCheckRayOriginX); 
+					var ShadowCheckRayDirectionY = (LightSourceY - ShadowCheckRayOriginY); 
+					var ShadowCheckRayDirectionZ = (LightSourceZ - ShadowCheckRayOriginZ);
+					
+					var AreaHitByShadowLightRay = HitObjectByLightRay(ShadowCheckRayOriginX, ShadowCheckRayOriginY, ShadowCheckRayOriginZ, ShadowCheckRayDirectionX, ShadowCheckRayDirectionY, ShadowCheckRayDirectionZ);
+					if (AreaHitByShadowLightRay.ObjectNo < 0)
+					{
+						var AngleForBrightness = CalculateAngleBetweenNormalAndLightSource(AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, LightSourceX, LightSourceY, LightSourceZ, AreaHitByLightRay.ObjectNo);
+						if (Math.cos(AngleForBrightness) < 0) {AngleForBrightness = Math.PI/2;}
+						 
+						var ColorDirectLight = 
+						{
+							Red:    ColorOfObject.Red   * ColorOfLightSource.Red   * Math.cos(AngleForBrightness), 
+							Green:  ColorOfObject.Green * ColorOfLightSource.Green * Math.cos(AngleForBrightness), 
+							Blue:   ColorOfObject.Blue  * ColorOfLightSource.Blue  * Math.cos(AngleForBrightness), 
+						}
+					}
+					else
+					{
+						var ColorDirectLight = 
+						{
+							Red:    0, 
+							Green:  0, 
+							Blue:   0, 
+						}
+					}
+					
+					var ReflectLight      = CalculateReflection(OriginX, OriginY, OriginZ, AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, AreaHitByLightRay.ObjectNo);
+					var ColorReflectLight = CalculateColorOfPointByRayTracing(AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, ReflectLight.DirectionX, ReflectLight.DirectionY, ReflectLight.DirectionZ, RecursionDepth+1, RefractiveIndexInCurrentMedium);
+					
+					if (AreaHitByShadowLightRay.ObjectNo < 0)
+					{
+						var SurfaceGlossAngleBetweenLightSourceAndReflectionLightRay = AngleBetweenVectors(ReflectLight.DirectionX, ReflectLight.DirectionY, ReflectLight.DirectionZ,LightSourceX-AreaHitByLightRay.IntersectionPointX, LightSourceY-AreaHitByLightRay.IntersectionPointY, LightSourceZ-AreaHitByLightRay.IntersectionPointZ);
+						if (Math.abs(SurfaceGlossAngleBetweenLightSourceAndReflectionLightRay) > Math.PI/2) {SurfaceGlossAngleBetweenLightSourceAndReflectionLightRay = Math.PI/2;}
+						var SurfaceGlossFactor = Math.pow(Math.cos(SurfaceGlossAngleBetweenLightSourceAndReflectionLightRay),SurfaceStructur);
+						
+						var ColorDirectLight = 
+						{
+							Red:    ColorDirectLight.Red   + SurfaceGlossFactor * ColorOfLightSource.Red, 
+							Green:  ColorDirectLight.Green + SurfaceGlossFactor * ColorOfLightSource.Green, 
+							Blue:   ColorDirectLight.Blue  + SurfaceGlossFactor * ColorOfLightSource.Blue,
+						};
+					}
+					
+					if (RefractiveIndexInCurrentMedium == RefractiveIndexOfMaterial) 
+					{
+						var RefractiveIndexInNewMedium = 1.00;
+					}
+					else
+					{
+						var RefractiveIndexInNewMedium = RefractiveIndexOfMaterial;
+					}
+					
+					var RefractionLight      = CalculateRefraction(OriginX, OriginY, OriginZ, AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, AreaHitByLightRay.ObjectNo, RefractiveIndexInCurrentMedium, RefractiveIndexInNewMedium);
+					if (RefractionLight.TotalReflection == false)
+					{
+						var ColorRefractionLight = CalculateColorOfPointByRayTracing(AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, RefractionLight.DirectionX, RefractionLight.DirectionY, RefractionLight.DirectionZ, RecursionDepth+1, RefractiveIndexInNewMedium);
+					}
+					else
+					{
+						var ColorRefractionLight = 
+						{ 
+							Red: 0, 
+							Green: 0, 
+							Blue: 0, 
+						}
+					}
+					
+					
+					var ColorPixel =
+					{
+						Red:    ColorDirectLight.Red   * PartOfDirectLight + ColorReflectLight.Red   * PartOfReflectlight + ColorRefractionLight.Red   * PartOfRefractionlight + ColorOfLightSource.Red   * PartSurrounding,
+						Green:  ColorDirectLight.Green * PartOfDirectLight + ColorReflectLight.Green * PartOfReflectlight + ColorRefractionLight.Green * PartOfRefractionlight + ColorOfLightSource.Green * PartSurrounding, 
+						Blue:   ColorDirectLight.Blue  * PartOfDirectLight + ColorReflectLight.Blue  * PartOfReflectlight + ColorRefractionLight.Blue  * PartOfRefractionlight + ColorOfLightSource.Blue  * PartSurrounding,
+					}
+				}
+				else
+				{
+					var ColorPixel = 
+					{
+						Red:    1, 
+						Green:  1, 
+						Blue:   1, 
+					}					
+				}
+				
+				return { 
+					Red: ColorPixel.Red, 
+					Green: ColorPixel.Green, 
+					Blue: ColorPixel.Blue, 
+				};
+			}
+			
+			function HitObjectByLightRay(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ) 
+			{
+				var ObjectNo = -1;
+				var Distance = 1e6;
+				var IntersectionPointX = 1e6; 
+				var IntersectionPointY = 1e6; 
+				var IntersectionPointZ = 1e6;
+				
+				for (i = 0; i < AreaIndex; i++) 
+				{
+					var HitWithArea = CheckForHitWithArea(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ, i);
+					if (HitWithArea.HitHappend == true && HitWithArea.Distance < Distance)
+					{
+						ObjectNo = i;
+						Distance = HitWithArea.Distance;
+						IntersectionPointX = HitWithArea.IntersectionPointX;
+						IntersectionPointY = HitWithArea.IntersectionPointY;
+						IntersectionPointZ = HitWithArea.IntersectionPointZ;
+					}
+				}
+				
+				return {
+					ObjectNo: ObjectNo, 
+					IntersectionPointX: IntersectionPointX, 
+					IntersectionPointY: IntersectionPointY, 
+					IntersectionPointZ: IntersectionPointZ, 
+					Distance: Distance,
+				};
+			}
+			
+			function CheckForHitWithArea(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ, i)
+			{
+				var HitHappend = false; 
+				var Distance = 1e6; 
+				var IntersectionPointX = 1e6; 
+				var IntersectionPointY = 1e6; 
+				var IntersectionPointZ = 1e6; 
+				
+				var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2];
+				var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2];
+				var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2];
+				
+				var a = +(By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az); 
+				var b = -(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az);
+				var c = +(Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay);
+				var d = -(Cy*Az*Bx + Cz*Ax*By + Cx*Ay*Bz - Cz*Ay*Bx - Cx*Az*By - Cy*Ax*Bz);
+				
+				var ScalarProduct =  DirectionX * a + DirectionY * b + DirectionZ * c; 
+				
+				if (ScalarProduct != 0)  
+				{
+					var w = (-a * OriginX -b * OriginY -c * OriginZ -d) / ScalarProduct; 
+					IntersectionPointX = OriginX + w * DirectionX;
+					IntersectionPointY = OriginY + w * DirectionY;
+					IntersectionPointZ = OriginZ + w * DirectionZ;
+					
+					if ((w > 1e-10) && CheckIfIntersectionWithinArea(IntersectionPointX, IntersectionPointY, IntersectionPointZ, i) == true)
+					{
+						HitHappend = true;
+						Distance = Math.sqrt((OriginX-IntersectionPointX)*(OriginX-IntersectionPointX) + (OriginY-IntersectionPointY)*(OriginY-IntersectionPointY) + (OriginZ-IntersectionPointZ)*(OriginZ-IntersectionPointZ));
+					}
+				}
+				
+				return {
+					HitHappend : HitHappend,
+					Distance   : Distance,
+					IntersectionPointX: IntersectionPointX,
+					IntersectionPointY: IntersectionPointY,
+					IntersectionPointZ: IntersectionPointZ,
+				};
+			}
+			
+			function CheckIfIntersectionWithinArea(IntersectionPointX, IntersectionPointY, IntersectionPointZ, i)
+			{
+				var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2];
+				var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2];
+				var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2];
+				
+				var Mx = (Bx - Ax)/2 + Ax; var My = (By - Ay)/2 + Ay; var Mz = (Bz - Az)/2 + Az;
+				
+				var Sx = IntersectionPointX; var Sy = IntersectionPointY; var Sz = IntersectionPointZ; 
+				
+				var T1 = ((By - Sy)*Ax + (-Bx + Sx)*Ay + Bx*Sy - By*Sx)/((My - Sy)*Ax + (Sx - Mx)*Ay + (Sy - My)*Bx + By*(Mx - Sx)); 
+				var R1 = ((Sy - My)*Bx + By*(Mx - Sx) - Sy*Mx + Sx*My)/((Sy - My)*Bx + By*(Mx - Sx) + Ax*My - Ax*Sy - Ay*Mx + Ay*Sx);
+				
+				var T2 = ((Cy - Sy)*Bx + (-Cx + Sx)*By + Cx*Sy - Cy*Sx)/((My - Sy)*Bx + (Sx - Mx)*By + (Sy - My)*Cx + Cy*(Mx - Sx)); 
+				var R2 = ((Sy - My)*Cx + Cy*(Mx - Sx) - Sy*Mx + Sx*My)/((Sy - My)*Cx + Cy*(Mx - Sx) + Bx*My - Bx*Sy - By*Mx + By*Sx);
+				
+				var T3 = ((Ay - Sy)*Cx + (-Ax + Sx)*Cy + Ax*Sy - Ay*Sx)/((My - Sy)*Cx + (Sx - Mx)*Cy + (Sy - My)*Ax + Ay*(Mx - Sx)); 
+				var R3 = ((Sy - My)*Ax + Ay*(Mx - Sx) - Sy*Mx + Sx*My)/((Sy - My)*Ax + Ay*(Mx - Sx) + Cx*My - Cx*Sy - Cy*Mx + Cy*Sx);
+				
+				var NumberOfInterceptionsWithAreaEdges = 0;
+				if (T1 >= 0 && R1 >= 0 && R1 <= 1) {NumberOfInterceptionsWithAreaEdges = NumberOfInterceptionsWithAreaEdges + 1;} 
+				if (T2 >= 0 && R2 >= 0 && R2 <= 1) {NumberOfInterceptionsWithAreaEdges = NumberOfInterceptionsWithAreaEdges + 1;} 
+				if (T3 >= 0 && R3 >= 0 && R3 <= 1) {NumberOfInterceptionsWithAreaEdges = NumberOfInterceptionsWithAreaEdges + 1;} 
+				if (NumberOfInterceptionsWithAreaEdges == 1) 
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			}
+			
+			function CalculateReflection(OriginX, OriginY, OriginZ, IntersectionPointX, IntersectionPointY, IntersectionPointZ, i) 
+			{ 
+				var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2]; 
+				var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2]; 
+				var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2]; 
+				
+				var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
+				var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
+				var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
+				
+				var Factor  = (nx * (OriginX - IntersectionPointX) + ny * (OriginY - IntersectionPointY) + nz * (OriginZ - IntersectionPointZ)) / (nx*nx + ny*ny + nz*nz);
+				var Qx = 2 * nx * Factor + 2 * IntersectionPointX - OriginX; 
+				var Qy = 2 * ny * Factor + 2 * IntersectionPointY - OriginY; 
+				var Qz = 2 * nz * Factor + 2 * IntersectionPointZ - OriginZ; 
+				
+				return {
+					DirectionX: Qx - IntersectionPointX, 
+					DirectionY: Qy - IntersectionPointY, 
+					DirectionZ: Qz - IntersectionPointZ,
+				};
+			}
+			
+			function CalculateRefraction(OriginX, OriginY, OriginZ, IntersectionPointX, IntersectionPointY, IntersectionPointZ, i, RefractiveIndexInCurrentMedium, RefractiveIndexInNewMaterial)
+			{
+				var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2]; 
+				var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2]; 
+				var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2]; 
+				
+				var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
+				var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
+				var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
+				
+				var Factor  = (nx * (OriginX - IntersectionPointX) + ny * (OriginY - IntersectionPointY) + nz * (OriginZ - IntersectionPointZ)) / (nx*nx + ny*ny + nz*nz);
+				var Qx = 2 * nx * Factor + 2 * IntersectionPointX - OriginX; 
+				var Qy = 2 * ny * Factor + 2 * IntersectionPointY - OriginY; 
+				var Qz = 2 * nz * Factor + 2 * IntersectionPointZ - OriginZ; 
+			
+				var Alpha = AngleBetweenVectors(IntersectionPointX - OriginX, IntersectionPointY - OriginY, IntersectionPointZ - OriginZ, nx, ny, nz);
+				if (Alpha > Math.PI/2)
+				{
+					nx = -nx; ny = -ny; nz = -nz; 
+					Alpha = AngleBetweenVectors(IntersectionPointX - OriginX, IntersectionPointY - OriginY, IntersectionPointZ - OriginZ, nx, ny, nz);
+				}
+				var TempBeta = Math.sin(Alpha) * RefractiveIndexInCurrentMedium / RefractiveIndexInNewMaterial;
+				if (Math.abs(TempBeta) > 1)
+				{
+					var TotalReflection = true;
+					var Hx = IntersectionPointX; 
+					var Hy = IntersectionPointY; 
+					var Hz = IntersectionPointZ;
+				}
+				else
+				{
+					var TotalReflection = false;
+					var Beta = Math.asin(TempBeta);
+					
+					var US = LengthOfVector(IntersectionPointX - OriginX, IntersectionPointY - OriginY, IntersectionPointZ - OriginZ);
+					var UQ = LengthOfVector(Qx-OriginX, Qy-OriginY, Qz-OriginZ);
+					var UW = US*(Math.sin(Alpha)+Math.sin(Beta));
+					
+					var Wx = OriginX+(UW)/(UQ)*(Qx-OriginX); 
+					var Wy = OriginY+(UW)/(UQ)*(Qy-OriginY); 
+					var Wz = OriginZ+(UW)/(UQ)*(Qz-OriginZ);
+					
+					var WH = US*(Math.cos(Alpha)+Math.cos(Beta));
+					
+					var Hx = Wx + WH*nx/Math.sqrt(nx*nx+ny*ny+nz*nz); 
+					var Hy = Wy + WH*ny/Math.sqrt(nx*nx+ny*ny+nz*nz); 
+					var Hz = Wz + WH*nz/Math.sqrt(nx*nx+ny*ny+nz*nz);
+				}	
+				
+				return { 
+					TotalReflection: TotalReflection, 
+					DirectionX: Hx - IntersectionPointX, 
+					DirectionY: Hy - IntersectionPointY, 
+					DirectionZ: Hz - IntersectionPointZ,
+				};
+			} 
+
+			function CalculateAngleBetweenNormalAndLightSource(IntersectionPointX, IntersectionPointY, IntersectionPointZ, LightSourceX, LightSourceY, LightSourceZ, i)
+			{
+				var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2]; 
+				var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2]; 
+				var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2]; 
+				
+				var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
+				var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
+				var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
+				
+				return AngleBetweenVectors(nx,ny,nz,IntersectionPointX-LightSourceX, IntersectionPointY-LightSourceY, IntersectionPointZ-LightSourceZ);
+			}
+			
+			
+			
+			
+		</script>
+		<button onclick="clearScreen()">Clear Screen</button> 
+	</body>
+</html>
+
+
+
+
+
+
+
+
