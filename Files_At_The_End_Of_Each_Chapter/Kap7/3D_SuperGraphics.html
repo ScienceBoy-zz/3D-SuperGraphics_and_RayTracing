@@ -1,0 +1,159 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Cool 3D Graphics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<canvas id="Canvas" style="width:100%; height:80%; border:0px;" tabindex='1'>
+			Unfortunately, your browser does not support the canvas element. Please use another, more modern web browser 
+		</canvas>
+		<script src="3D_SuperGraphics_Functions.js"></script> 
+		<script> 
+			var canvas = document.getElementById("Canvas"); 
+			var rect = canvas.getBoundingClientRect(); 
+			canvas.width = rect.width; 
+			canvas.height = rect.height; 
+			var DrawingContext = canvas.getContext("2d"); 
+			DrawingContext.scale(1, 1); 
+
+			var KeyPressed = 0; 
+			var mousePos; 
+			var NumberOfPoints = 0; 
+			var oldx = 0; 
+			var oldy = 0; 
+			var oldkoorx = 0; 
+			var oldkoory = 0;
+			
+			var MaxNumberOfPoints = 100; 
+			var MaxNbOfRotSegments  = 360;
+			
+			var PointCoordinatesArray = new Array2D(MaxNumberOfPoints, 3); 
+			var OriginPointCoords = new Array3D(MaxNbOfRotSegments, MaxNumberOfPoints, 3); 
+			var Points = new Array3D(MaxNbOfRotSegments , MaxNumberOfPoints, 3);
+			
+			var maxarea = MaxNumberOfPoints * MaxNbOfRotSegments;
+			var Area = new Array3D(maxarea, 4, 3);
+			var AreaIndex = 0;
+			
+			var AreaZValues = new Array1D(maxarea); 
+			var AreaOrderIndex = new Array1D(maxarea);
+			
+			var width = canvas.width; 
+			var height = canvas.height;
+			
+			var TotalEnteredPoints = 0;
+			var NumberOfRotationSegments = 60;
+			
+			var Perspective = 0;
+		
+			var DrawingMethod = 0;
+		
+			var AngleX = 0; // Rotation angle around X-axis 
+			var AngleY = 0; 
+			var AngleZ = 0;
+			
+			var NumberOfRotationsX = 0; 
+			var NumberOfRotationsY = 0; 
+			var NumberOfRotationsZ = 0; 
+			var increment = 3; 
+			
+			EnterNewPoints();  
+			
+			
+			function CalcOrderOfAreasAlongZAxis()
+			{
+				AreaZValues = new Array1D(AreaIndex); 
+				AreaOrderIndex = new Array1D(AreaIndex);
+				for (i = 0; i < AreaIndex; i++) 
+				{
+					AreaZValues.items[i] = AverageAreaCornerZValues(i); 
+					AreaOrderIndex.items[i] = i; 
+				}
+				AreaOrderIndex.items.sort(function(a, b){return AreaZValues.items[b]-AreaZValues.items[a]});
+			}
+			
+			function AverageAreaCornerZValues(CheckAreaIndex)
+			{
+				var CornerA = Area.items[CheckAreaIndex][0][2];
+				var CornerB = Area.items[CheckAreaIndex][1][2]; 
+				var CornerC = Area.items[CheckAreaIndex][2][2]; 
+				var CornerD = Area.items[CheckAreaIndex][3][2]; 
+				var AverageArea = (CornerA + CornerB + CornerC + CornerD)/4;
+				return AverageArea; 
+			}
+			
+			function BuildAreasFrom3DPoints()
+			{
+				AreaIndex = 0;
+				for (i = 0; i < NumberOfRotationSegments-1; i++)
+				{
+					for (j = 0; j < TotalEnteredPoints-1; j++) 
+					{
+						for (k = 0; k < 3; k++) 
+						{
+							Area.items[AreaIndex][0][k] = Points.items[i][j][k]; 
+							Area.items[AreaIndex][1][k] = Points.items[i][j+1][k]; 
+							Area.items[AreaIndex][2][k] = Points.items[i+1][j+1][k]; 
+							Area.items[AreaIndex][3][k] = Points.items[i+1][j][k]; 
+						}
+						AreaIndex = AreaIndex + 1;
+					}
+				}
+				
+				for (j = 0; j < TotalEnteredPoints-1; j++)
+				{
+					for (k = 0; k < 3; k++)
+					{
+						Area.items[AreaIndex][0][k] = Points.items[NumberOfRotationSegments-1][j][k]; 
+						Area.items[AreaIndex][1][k] = Points.items[NumberOfRotationSegments-1][j+1][k]; 
+						Area.items[AreaIndex][2][k] = Points.items[0][j+1][k]; 
+						Area.items[AreaIndex][3][k] = Points.items[0][j][k];						
+					}
+					AreaIndex = AreaIndex + 1;
+				}
+			}
+			
+			function ShowAreaOf3DObject()
+			{
+				CalcOrderOfAreasAlongZAxis();  
+				for (i = 0; i < AreaIndex; i++)
+				{
+					var NewIndexAccordingToZValue = AreaOrderIndex.items[i];  
+					var ColorAccordingToDepthLevel = 255/AreaIndex*i;
+					if (DrawingMethod == 0 || DrawingMethod == 1) DrawingContext.fillStyle = "rgb("+ColorAccordingToDepthLevel+", "+ColorAccordingToDepthLevel+", "+ColorAccordingToDepthLevel+")";   
+					if (DrawingMethod == 2) DrawingContext.fillStyle = "#ffffff"; 
+					//DrawingContext.fillStyle = "#ffffff"; 
+					DrawingContext.strokeStyle = "#000000";
+					DrawingContext.beginPath();
+					for (j = 0; j < 4; j++)
+					{
+						var CornerXCoord = width/2- Area.items[NewIndexAccordingToZValue][j][0]; 
+						var CornerYCoord = height/2- Area.items[NewIndexAccordingToZValue][j][1];
+						if (j == 0) 
+						{
+							DrawingContext.moveTo(CornerXCoord, CornerYCoord);
+						}
+						else
+						{
+							DrawingContext.lineTo(CornerXCoord, CornerYCoord);
+						}
+					}
+					DrawingContext.closePath(); 
+					if (DrawingMethod != 3) DrawingContext.fill(); 
+					if (DrawingMethod == 0 || DrawingMethod == 2 || DrawingMethod == 3) DrawingContext.stroke(); 
+				}
+			}
+			
+		</script>
+		<button onclick="clearScreen()">Clear Screen</button> 
+	</body>
+</html>
+
+
+
+
+
+
+
+

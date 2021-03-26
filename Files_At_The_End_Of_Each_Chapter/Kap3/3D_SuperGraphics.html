@@ -1,0 +1,127 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Cool 3D Graphics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<canvas id="Canvas" style="width:100%; height:80%; border:0px;" tabindex='1'>
+			Unfortunately, your browser does not support the canvas element. Please use another, more modern web browser 
+		</canvas>
+		<script src="3D_SuperGraphics_Functions.js"></script> 
+		<script> 
+			var canvas = document.getElementById("Canvas"); 
+			var rect = canvas.getBoundingClientRect(); 
+			canvas.width = rect.width; 
+			canvas.height = rect.height; 
+			var DrawingContext = canvas.getContext("2d"); 
+			DrawingContext.scale(1, 1); 
+
+			var KeyPressed = 0; 
+			var mousePos; 
+			var NumberOfPoints = 0; 
+			var oldx = 0; 
+			var oldy = 0; 
+			var oldkoorx = 0; 
+			var oldkoory = 0;
+			var MaxNumberOfPoints = 100; 
+			var PointCoordinatesArray = new Array2D(MaxNumberOfPoints, 3); 
+			var width = canvas.width; 
+			var height = canvas.height;
+			var TotalEnteredPoints = 0;
+			
+			function EnterNewPoints() 
+			{ 
+				window.addEventListener('mousemove', mousemoveevent); 
+				window.addEventListener('mousedown', mousedownevent); 
+				window.addEventListener('keydown', keydownevent); 
+				drawText(10,20,"Click to enter a new point. Press any key to finish.",DrawingContext,"#0000FF","left");   
+				ShowAxesAndEnteredPoints();
+			}
+			EnterNewPoints();  
+			
+			function mousemoveevent(event) {mousePos = getMousePos(canvas, event); ShowMousemove();} 
+			function mousedownevent(event) {AddMousePosition();} 
+			function keydownevent(event) {KeyPressed = 1; CheckIfAllPointsWereEntered();} 
+			
+			function CheckIfAllPointsWereEntered()
+			{
+				if (NumberOfPoints >= 2 && (NumberOfPoints > MaxNumberOfPoints || KeyPressed == 1)) 
+				{
+					clearScreen(); 
+					ShowAxesAndEnteredPoints();
+					drawLine(PointCoordinatesArray.items[NumberOfPoints-1][0] + width/2, height/2 - PointCoordinatesArray.items[NumberOfPoints-1][1], PointCoordinatesArray.items[0][0] + width/2, height/2 - PointCoordinatesArray.items[0][1], 1, DrawingContext,"#000000");
+					window.removeEventListener('mousemove',mousemoveevent); 
+					window.removeEventListener('mousedown',mousedownevent); 
+					window.removeEventListener('keydown',keydownevent);
+					TotalEnteredPoints = NumberOfPoints;
+				}
+				else
+				{
+					KeyPressed = 0;
+				}
+			}
+			
+			function ShowMousemove()
+			{
+				if (NumberOfPoints == 0) 
+				{ 
+					oldx = mousePos.x; 
+					oldy = mousePos.y; 
+				} 
+				else
+				{
+					if ((mousePos.x != oldx) || (mousePos.y != oldy))
+					{
+						drawLine(oldkoorx, oldkoory, oldx, oldy, 3, DrawingContext,"#FFFFFF"); 
+						drawLine(oldkoorx, oldkoory, mousePos.x, mousePos.y, 1, DrawingContext,"#000000");       
+						oldx = mousePos.x; 
+						oldy = mousePos.y;
+					}
+				}
+				ShowAxesAndEnteredPoints();
+			}
+			
+			function AddMousePosition() 
+			{ 
+				PointCoordinatesArray.items[NumberOfPoints][0] = mousePos.x - width/2;
+				PointCoordinatesArray.items[NumberOfPoints][1] = height/2 - mousePos.y; 
+				oldkoorx = mousePos.x; 
+				oldkoory = mousePos.y; 
+				NumberOfPoints = NumberOfPoints + 1; 
+				ShowAxesAndEnteredPoints();
+				CheckIfAllPointsWereEntered();
+			}
+			
+			function ShowAxesAndEnteredPoints() 
+			{
+				drawLine(width/2, 0, width/2, height, 1, DrawingContext,"#000000");
+				drawLine(0, height/2, width, height/2, 1, DrawingContext,"#000000"); 
+				for (i = 0; i < NumberOfPoints; i++) 
+				{  
+					var x1 = PointCoordinatesArray.items[i][0] + width/2; 
+					var y1 = height/2 - PointCoordinatesArray.items[i][1]; 
+					if (i >= 1) 
+					{ 
+						var x2 = PointCoordinatesArray.items[i-1][0] + width/2; 
+						var y2 = height/2 - PointCoordinatesArray.items[i-1][1]; 
+						drawLine(x1, y1, x2, y2, 1, DrawingContext,"#000000"); 
+					}
+					drawText(x1+10, y1+10, (i+1), DrawingContext,"#000000","left"); 
+				}
+			}
+			
+		</script>
+		<!-- <button onclick="drawBoxFromPressedButton();">Click on the button to draw a box</button>  -->
+		<!-- <button onmousedown="drawBoxFromPushedButton()" ontouchstart="drawBoxFromPushedButton()">Draw a box when the button is still pushed</button>  -->
+		<button onclick="clearScreen()">Clear Screen</button> 
+	</body>
+</html>
+
+
+
+
+
+
+
+

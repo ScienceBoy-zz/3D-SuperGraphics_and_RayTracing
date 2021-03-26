@@ -1,0 +1,89 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Cool 3D Graphics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<canvas id="Canvas" style="width:100%; height:80%; border:0px;" tabindex='1'>
+			Unfortunately, your browser does not support the canvas element. Please use another, more modern web browser 
+		</canvas>
+		<script src="3D_SuperGraphics_Functions.js"></script> 
+		<script> 
+			var canvas = document.getElementById("Canvas"); 
+			var rect = canvas.getBoundingClientRect(); 
+			canvas.width = rect.width; 
+			canvas.height = rect.height; 
+			var DrawingContext = canvas.getContext("2d"); 
+			DrawingContext.scale(1, 1); 
+
+			var KeyPressed = 0; 
+			var mousePos; 
+			var NumberOfPoints = 0; 
+			var oldx = 0; 
+			var oldy = 0; 
+			var oldkoorx = 0; 
+			var oldkoory = 0;
+			var MaxNumberOfPoints = 100; 
+			var MaxNbOfRotSegments  = 360;
+			var PointCoordinatesArray = new Array2D(MaxNumberOfPoints, 3); 
+			var OriginPointCoords = new Array3D(MaxNbOfRotSegments, MaxNumberOfPoints, 3); 
+			var Points = new Array3D(MaxNbOfRotSegments , MaxNumberOfPoints, 3);
+			var width = canvas.width; 
+			var height = canvas.height;
+			var TotalEnteredPoints = 0;
+			var NumberOfRotationSegments = 60;
+			var Perspective = 0;
+			var AngleX = 0; // Rotation angle around X-axis 
+			var AngleY = 0; 
+			var AngleZ = 0;
+			var NumberOfRotationsX = 0; 
+			var NumberOfRotationsY = 0; 
+			var NumberOfRotationsZ = 0; 
+			var increment = 3; 
+			
+			EnterNewPoints();  
+			
+			function Rotation() 
+			{ 
+				var RadFromGrad = 2*Math.PI/360;
+				for (i = 0; i < NumberOfRotationSegments; i++) 
+				{ 
+					for (j = 0; j < TotalEnteredPoints; j++) 
+					{
+						// Rotation around X
+						var y_rot = OriginPointCoords.items[i][j][1] * Math.cos(RadFromGrad*AngleX) - OriginPointCoords.items[i][j][2] * Math.sin(RadFromGrad*AngleX);
+						var z_rot = OriginPointCoords.items[i][j][1] * Math.sin(RadFromGrad*AngleX) + OriginPointCoords.items[i][j][2] * Math.cos(RadFromGrad*AngleX);
+						Points.items[i][j][0] = OriginPointCoords.items[i][j][0];
+						Points.items[i][j][1] = y_rot; 
+						Points.items[i][j][2] = z_rot;
+						
+						// Rotation around Y
+						var x_rot = Points.items[i][j][0] * Math.cos(RadFromGrad*AngleY) + Points.items[i][j][2] * Math.sin(RadFromGrad*AngleY); 
+						var z_rot =-Points.items[i][j][0] * Math.sin(RadFromGrad*AngleY) + Points.items[i][j][2] * Math.cos(RadFromGrad*AngleY); 
+						Points.items[i][j][0] = x_rot; 
+						Points.items[i][j][2] = z_rot;
+						
+						// Rotation around Z
+						var x_rot = Points.items[i][j][0] * Math.cos(RadFromGrad*AngleZ) - Points.items[i][j][1] * Math.sin(RadFromGrad*AngleZ); 
+						var y_rot = Points.items[i][j][0] * Math.sin(RadFromGrad*AngleZ) + Points.items[i][j][1] * Math.cos(RadFromGrad*AngleZ); 
+						Points.items[i][j][0] = x_rot; 
+						Points.items[i][j][1] = y_rot;
+						
+					}
+				}
+			}
+			
+			
+		</script>
+		<button onclick="clearScreen()">Clear Screen</button> 
+	</body>
+</html>
+
+
+
+
+
+
+
+

@@ -1,0 +1,107 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Cool 3D Graphics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<canvas id="Canvas" style="width:100%; height:80%; border:0px;" tabindex='1'>
+			Unfortunately, your browser does not support the canvas element. Please use another, more modern web browser 
+		</canvas>
+		<script src="3D_SuperGraphics_Functions.js"></script> 
+		<script> 
+			var canvas = document.getElementById("Canvas"); 
+			var rect = canvas.getBoundingClientRect(); 
+			canvas.width = rect.width; 
+			canvas.height = rect.height; 
+			var DrawingContext = canvas.getContext("2d"); 
+			DrawingContext.scale(1, 1); 
+
+			var KeyPressed = 0; 
+			var mousePos; 
+			var NumberOfPoints = 0; 
+			var oldx = 0; 
+			var oldy = 0; 
+			var oldkoorx = 0; 
+			var oldkoory = 0;
+			
+			var MaxNumberOfPoints = 100; 
+			var MaxNbOfRotSegments  = 360;
+			
+			var PointCoordinatesArray = new Array2D(MaxNumberOfPoints, 3); 
+			var OriginPointCoords = new Array3D(MaxNbOfRotSegments, MaxNumberOfPoints, 3); 
+			var Points = new Array3D(MaxNbOfRotSegments , MaxNumberOfPoints, 3);
+			
+			var maxarea = MaxNumberOfPoints * MaxNbOfRotSegments;
+			var Area = new Array3D(maxarea, 4, 3);
+			var AreaIndex = 0;
+			
+			var AreaZValues = new Array1D(maxarea); 
+			var AreaOrderIndex = new Array1D(maxarea);
+			
+			var width = canvas.width; 
+			var height = canvas.height;
+			
+			var TotalEnteredPoints = 0;
+			var NumberOfRotationSegments = 60;
+			
+			var Perspective = 0;
+		
+			var DrawingMethod = 0;
+		
+			var AngleX = 0; // Rotation angle around X-axis 
+			var AngleY = 0; 
+			var AngleZ = 0;
+			
+			var NumberOfRotationsX = 0; 
+			var NumberOfRotationsY = 0; 
+			var NumberOfRotationsZ = 0; 
+			var increment = 3; 
+			
+			var Resolution = 4;
+
+			//EnterNewPoints();  
+			
+			RayTracing();
+			
+			function RayTracing() 
+			{ 
+				for (x = 1; x < width; x = x + Resolution) 
+				{ 
+					for (y = 1 ; y < height; y = y + Resolution) 
+					{
+						var OriginX = x;    var OriginY = y;    var OriginZ = -10000; 
+						var TargetX = x;    var TargetY = y;    var TargetZ = 10000;
+						var DirectionX = TargetX - OriginX; var DirectionY = TargetY - OriginY; var DirectionZ = TargetZ - OriginZ;
+						var ColorOfPoint = CalculateColorOfPointByRayTracing(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ); 
+						drawBox(x,y,x+Resolution,y+Resolution,1,DrawingContext,"rgb("+ColorOfPoint.ColorRed+", "+ColorOfPoint.ColorGreen+", "+ColorOfPoint.ColorBlue+")",true); 
+					}
+				}
+			}
+			
+			function CalculateColorOfPointByRayTracing(OriginX, OriginY, OriginZ, DirectionX, DirectionY, DirectionZ) 
+			{ 
+				var ColorRed 	= Math.floor(Math.random() * 255); 
+				var ColorGreen 	= Math.floor(Math.random() * 255); 
+				var ColorBlue 	= Math.floor(Math.random() * 255); 
+				
+				return { 
+					ColorRed: ColorRed, 
+					ColorGreen: ColorGreen, 
+					ColorBlue: ColorBlue, 
+				};
+			}
+			
+			
+		</script>
+		<button onclick="clearScreen()">Clear Screen</button> 
+	</body>
+</html>
+
+
+
+
+
+
+
+

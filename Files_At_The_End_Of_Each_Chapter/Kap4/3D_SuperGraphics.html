@@ -1,0 +1,98 @@
+<!Doctype html>
+<html>
+	<head>
+		<title>Cool 3D Graphics</title>
+		<meta charset="utf-8">
+	</head>
+	<body>
+		<canvas id="Canvas" style="width:100%; height:80%; border:0px;" tabindex='1'>
+			Unfortunately, your browser does not support the canvas element. Please use another, more modern web browser 
+		</canvas>
+		<script src="3D_SuperGraphics_Functions.js"></script> 
+		<script> 
+			var canvas = document.getElementById("Canvas"); 
+			var rect = canvas.getBoundingClientRect(); 
+			canvas.width = rect.width; 
+			canvas.height = rect.height; 
+			var DrawingContext = canvas.getContext("2d"); 
+			DrawingContext.scale(1, 1); 
+
+			var KeyPressed = 0; 
+			var mousePos; 
+			var NumberOfPoints = 0; 
+			var oldx = 0; 
+			var oldy = 0; 
+			var oldkoorx = 0; 
+			var oldkoory = 0;
+			var MaxNumberOfPoints = 100; 
+			var MaxNbOfRotSegments  = 360;
+			var PointCoordinatesArray = new Array2D(MaxNumberOfPoints, 3); 
+			var OriginPointCoords = new Array3D(MaxNbOfRotSegments, MaxNumberOfPoints, 3); 
+			var Points = new Array3D(MaxNbOfRotSegments , MaxNumberOfPoints, 3);
+			var width = canvas.width; 
+			var height = canvas.height;
+			var TotalEnteredPoints = 0;
+			var NumberOfRotationSegments = 60;
+			
+			EnterNewPoints();  
+			
+			function CreateRotationObject() 
+			{
+				for (i = 0; i < NumberOfRotationSegments; i++)
+				{
+					var s = Math.sin(2*Math.PI/NumberOfRotationSegments*i); 
+					var c = Math.cos(2*Math.PI/NumberOfRotationSegments*i); 
+					
+					for (j = 0; j < TotalEnteredPoints; j++)
+					{
+						OriginPointCoords.items[i][j][0] = (PointCoordinatesArray.items[j][0] * c); 
+						Points.items[i][j][0] = OriginPointCoords.items[i][j][0];		
+
+						OriginPointCoords.items[i][j][1] = PointCoordinatesArray.items[j][1]; 
+						Points.items[i][j][1] = OriginPointCoords.items[i][j][1]; 
+						                        
+						OriginPointCoords.items[i][j][2] = -(PointCoordinatesArray.items[j][0] * s);  
+						Points.items[i][j][2] = OriginPointCoords.items[i][j][2]; 
+					}			
+				}
+				Show3dObject();
+			}
+			
+			function Show3dObject()
+			{
+				clearScreen(); 
+				drawLine(width/2, 0, width/2, height,1,DrawingContext,"#000000"); 
+				drawLine(0, height/2, width, height/2,1,DrawingContext,"#000000"); 
+				
+				var TempPointX = new Array2D(MaxNbOfRotSegments ,MaxNumberOfPoints); 
+				var TempPointY = new Array2D(MaxNbOfRotSegments ,MaxNumberOfPoints); 
+				
+				for (i = 0; i < NumberOfRotationSegments; i++) 
+				{
+					for (j = 0; j < TotalEnteredPoints; j++)
+					{
+						TempPointX.items[i][j] = width/2-Points.items[i][j][0]; 
+						TempPointY.items[i][j] = height/2-Points.items[i][j][1];
+						if (j > 0) {drawLine(TempPointX.items[i][j-1], TempPointY.items[i][j-1], TempPointX.items[i][j], TempPointY.items[i][j], 1,DrawingContext,"#000000");}
+						if (i > 0) {drawLine(TempPointX.items[i][j], TempPointY.items[i][j], TempPointX.items[i-1][j], TempPointY.items[i-1][j], 1,DrawingContext,"#000000");}
+					}
+				}
+				for (j = 0; j < TotalEnteredPoints; j++)
+				{
+					drawLine(TempPointX.items[0][j], TempPointY.items[0][j], TempPointX.items[NumberOfRotationSegments-1][j], TempPointY.items[NumberOfRotationSegments-1][j], 1, DrawingContext,"#000000");	
+				}
+				
+			}
+			
+		</script>
+		<button onclick="clearScreen()">Clear Screen</button> 
+	</body>
+</html>
+
+
+
+
+
+
+
+
