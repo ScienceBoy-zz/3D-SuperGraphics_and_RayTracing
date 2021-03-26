@@ -199,6 +199,17 @@ function keydownevent(event)
 			RayTracing();
 			setTimeout(function() {document.title = "Calculation finished."; docTitle = 0;},0);
 			break;
+		case 81: // "q"	key
+			if (Resolution == StandardResolution) 
+			{
+				Resolution = StandardResolution*10;
+			}
+			else
+			{	
+				Resolution = StandardResolution;
+			}
+			setTimeout(function() {document.title = "Resolution set to: "+Resolution;},0);
+			break;
 		case 32: // "space" key
 			KeyPressed = 1; 
 			CheckIfAllPointsWereEntered();
