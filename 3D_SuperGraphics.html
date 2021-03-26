@@ -44,7 +44,7 @@
 			
 			var GradFromRad = 1/(2*Math.PI)*360;
 			
-			var LightSourceX = 500; 
+			var LightSourceX = 1000; 
 			var LightSourceY = 1000; 
 			var LightSourceZ = -1000;			
 			
@@ -67,10 +67,10 @@
 			var StandardResolution = 1;
 			var Resolution = StandardResolution;
 			
-			var PartOfDirectLight = 0.4;
-			var PartOfReflectlight = 0.3;
-			var PartOfRefractionlight = 0.3;
-			var PartSurrounding       = 0.0;
+			var PartOfDirectLight = 0.7;
+			var PartOfReflectlight = 0.1;
+			var PartOfRefractionlight = 0.1;
+			var PartSurrounding       = 0.1;
 			
 			var ColorOfObject = {Red:0/255, Green:255/255, Blue:50/255,};
 			var ColorOfLightSource = {Red:255/255, Green:255/255, Blue:255/255,};
@@ -410,11 +410,9 @@
 				return AngleBetweenVectors(nx,ny,nz,IntersectionPointX-LightSourceX, IntersectionPointY-LightSourceY, IntersectionPointZ-LightSourceZ);
 			}
 			
-			
-			
-			
+					
 		</script>
-		<button onclick="clearScreen()">Clear Screen</button> 
+		<a id='link'></a>
 	</body>
 </html>
 

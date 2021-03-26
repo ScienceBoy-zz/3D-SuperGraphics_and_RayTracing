@@ -210,6 +210,9 @@ function keydownevent(event)
 			}
 			setTimeout(function() {document.title = "Resolution set to: "+Resolution;},0);
 			break;
+		case 83: // "s" key
+			SaveAsImage();
+			break;
 		case 32: // "space" key
 			KeyPressed = 1; 
 			CheckIfAllPointsWereEntered();
@@ -323,6 +326,7 @@ function Show3dObject()
 	drawText(10,160,"Press d to change drawing method from <color with lines> to <color without lines> to <hidden line> and to <wireframe>",DrawingContext,"#000000","left");  
 	drawText(10,180,"Press r to start RayTracing calculation",DrawingContext,"#000000","left");
 	drawText(10,200,"Press q to toggle the resolution",DrawingContext,"#000000","left");
+	drawText(10,220,"Press s to safe a screenshot",DrawingContext,"#000000","left");
 	
 	var TempPointX = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
 	var TempPointY = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
@@ -551,7 +555,19 @@ function LengthOfVector(PointX, PointY, PointZ)
 	return Math.sqrt(PointX*PointX+PointY*PointY+PointZ*PointZ);
 }
 
-
+function SaveAsImage()
+{
+    var link = document.getElementById('link');
+    const timeElapsed = Date.now();
+    const today = new Date(timeElapsed);
+    var today_ISO = today.toISOString();
+    today_ISO = today_ISO.replace(":", "-");
+    today_ISO = today_ISO.replace(".","-");
+    link.setAttribute('download', 'RayTracing'+today_ISO+'.png');
+    link.setAttribute('href', canvas.toDataURL("image/png").replace("image/png", "image/octet-stream"));
+    link.click();
+	
+}
 
 
 
