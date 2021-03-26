@@ -322,6 +322,7 @@ function Show3dObject()
 	drawText(10,140,"Press <page up> / <page down> to increase / decrease the number of segments",DrawingContext,"#000000","left"); 
 	drawText(10,160,"Press d to change drawing method from <color with lines> to <color without lines> to <hidden line> and to <wireframe>",DrawingContext,"#000000","left");  
 	drawText(10,180,"Press r to start RayTracing calculation",DrawingContext,"#000000","left");
+	drawText(10,200,"Press q to toggle the resolution",DrawingContext,"#000000","left");
 	
 	var TempPointX = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
 	var TempPointY = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
