@@ -116,7 +116,7 @@ function EnterNewPoints()
 	window.addEventListener('mousemove', mousemoveevent); 
 	window.addEventListener('mousedown', mousedownevent); 
 	window.addEventListener('keydown', keydownevent); 
-	drawText(10,20,"Click to enter a new point. Press space to finish entering points. ",DrawingContext,"#0000FF","left");   
+	drawText(10,20,"Click to enter a new point. Press space to finish entering points. Or press <<L>> key if you have saved a scene before.",DrawingContext,"#0000FF","left");   
 	ShowAxesAndEnteredPoints();
 }
 
@@ -212,6 +212,12 @@ function keydownevent(event)
 			break;
 		case 83: // "s" key
 			SaveAsImage();
+			break;
+		case 75: // "k" key
+			SaveObject();
+			break;
+		case 76: // "l" key
+			LoadObject();
 			break;
 		case 32: // "space" key
 			KeyPressed = 1; 
@@ -327,6 +333,8 @@ function Show3dObject()
 	drawText(10,180,"Press r to start RayTracing calculation",DrawingContext,"#000000","left");
 	drawText(10,200,"Press q to toggle the resolution",DrawingContext,"#000000","left");
 	drawText(10,220,"Press s to save a screenshot",DrawingContext,"#000000","left");
+	drawText(10,240,"Press k to save the current scene",DrawingContext,"#000000","left");	
+	drawText(10,260,"Press l to load the saved scene",DrawingContext,"#000000","left");		
 	
 	var TempPointX = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
 	var TempPointY = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
@@ -568,7 +576,43 @@ function SaveAsImage()
     link.click();
 	
 }
+		
+function SaveObject()
+{
+	if ('localStorage' in window && window['localStorage'] !== null) 
+	{
+		localStorage.setItem("PointCoordinatesArray", JSON.stringify(PointCoordinatesArray));
+		localStorage.setItem("NumberOfRotationSegments", JSON.stringify(NumberOfRotationSegments));
+		localStorage.setItem("TotalEnteredPoints", JSON.stringify(TotalEnteredPoints));
+		localStorage.setItem("AngleX", JSON.stringify(AngleX));
+		localStorage.setItem("AngleY", JSON.stringify(AngleY));
+		localStorage.setItem("AngleZ", JSON.stringify(AngleZ));
+		localStorage.setItem("Perspective", JSON.stringify(Perspective));
+		alert("3D-Object saved");
+	}
+	else {alert("Sorry, your browser is too old to save data");}
+}
 
+function LoadObject()
+{
+	if ('localStorage' in window && window['localStorage'] !== null) 
+	{
+		PointCoordinatesArray = JSON.parse(localStorage.getItem("PointCoordinatesArray"));
+		NumberOfRotationSegments = JSON.parse(localStorage.getItem("NumberOfRotationSegments"));
+		TotalEnteredPoints = JSON.parse(localStorage.getItem("TotalEnteredPoints"));
+		AngleX = JSON.parse(localStorage.getItem("AngleX"));
+		NumberOfRotationsX = AngleX/increment;
+		AngleY = JSON.parse(localStorage.getItem("AngleY"));
+		NumberOfRotationsY = AngleY/increment;
+		AngleZ = JSON.parse(localStorage.getItem("AngleZ"));
+		NumberOfRotationsZ = AngleZ/increment;
+		Perspective = JSON.parse(localStorage.getItem("Perspective"));
+		clearScreen();
+		CreateRotationObject();
+		alert("3D-Object loaded"); 
+	}
+	else {alert("Sorry, your browser is too old to save data");}
+}
 
 
 
