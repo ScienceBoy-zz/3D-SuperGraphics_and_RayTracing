@@ -406,7 +406,7 @@
 				var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
 				var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
 				
-				return AngleBetweenVectors(nx,ny,nz,IntersectionPointX-LightSourceX, IntersectionPointY-LightSourceY, IntersectionPointZ-LightSourceZ);
+				return AngleBetweenVectors(nx,ny,nz, LightSourceX-IntersectionPointX, LightSourceY-IntersectionPointY, LightSourceZ-IntersectionPointZ);
 			}
 			
 			
