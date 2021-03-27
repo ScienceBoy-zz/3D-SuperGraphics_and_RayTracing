@@ -200,9 +200,9 @@ function keydownevent(event)
 			setTimeout(function() {document.title = "Calculation finished."; docTitle = 0;},0);
 			break;
 		case 81: // "q"	key
-			if (Resolution == StandardResolution) 
+			if (Resolution < StandardResolution*100) 
 			{
-				Resolution = StandardResolution*10;
+				Resolution = Resolution*2;
 			}
 			else
 			{	
