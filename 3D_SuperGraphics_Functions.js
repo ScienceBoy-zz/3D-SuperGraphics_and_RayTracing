@@ -609,6 +609,8 @@ function LoadObject()
 		Perspective = JSON.parse(localStorage.getItem("Perspective"));
 		clearScreen();
 		CreateRotationObject();
+		window.removeEventListener('mousemove',mousemoveevent); 
+		window.removeEventListener('mousedown',mousedownevent); 		
 		alert("3D-Object loaded"); 
 	}
 	else {alert("Sorry, your browser is too old to save data");}
