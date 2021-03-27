@@ -407,6 +407,8 @@
 				var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
 				var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
 				
+				var TempAngle = AngleBetweenVectors(nx,ny,nz, LightSourceX-IntersectionPointX, LightSourceY-IntersectionPointY, LightSourceZ-IntersectionPointZ); 
+				if (TempAngle > Math.PI/2) {nx = -nx; ny = -ny; nz = -nz;} 
 				return AngleBetweenVectors(nx,ny,nz, LightSourceX-IntersectionPointX, LightSourceY-IntersectionPointY, LightSourceZ-IntersectionPointZ);
 			}
 			
