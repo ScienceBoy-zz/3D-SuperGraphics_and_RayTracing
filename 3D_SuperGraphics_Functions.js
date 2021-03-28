@@ -116,7 +116,7 @@ function EnterNewPoints()
 	window.addEventListener('mousemove', mousemoveevent); 
 	window.addEventListener('mousedown', mousedownevent); 
 	window.addEventListener('keydown', keydownevent); 
-	drawText(10,20,"Click to enter a new point. Press space to finish entering points. Or press <<L>> key if you have saved a scene before.",DrawingContext,"#0000FF","left");   
+	//drawText(10,20,"Click to enter a new point. Press space to finish entering points. Or press <<L>> key if you have saved a scene before.",DrawingContext,"#0000FF","left");   
 	ShowAxesAndEnteredPoints();
 }
 
@@ -333,20 +333,20 @@ function Show3dObject()
 	clearScreen(); 
 	drawLine(width/2, 0, width/2, height,1,DrawingContext,"#000000"); 
 	drawLine(0, height/2, width, height/2,1,DrawingContext,"#000000");
-	drawText(10,60,"Press v to toggle perspective",DrawingContext,"#000000","left");
-	drawText(10,80,"Press 4 / 6 to rotate around X-Axis",DrawingContext,"#000000","left");
-	drawText(10,100,"Press 2 / 8 to rotate around Y-Axis",DrawingContext,"#000000","left");
-	drawText(10,120,"Press 1 / 9 to rotate around Z-Axis",DrawingContext,"#000000","left");
-	drawText(10,140,"Press <page up> / <page down> to increase / decrease the number of segments",DrawingContext,"#000000","left"); 
-	drawText(10,160,"Press d to change drawing method from <color with lines> to <color without lines> to <hidden line> and to <wireframe>",DrawingContext,"#000000","left");  
-	drawText(10,180,"Press r to start RayTracing calculation",DrawingContext,"#000000","left");
-	drawText(10,200,"Press q to toggle the resolution",DrawingContext,"#000000","left");
-	drawText(10,220,"Press s to save a screenshot",DrawingContext,"#000000","left");
-	drawText(10,240,"Press k to save the current scene",DrawingContext,"#000000","left");	
-	drawText(10,260,"Press l to load the saved scene",DrawingContext,"#000000","left");		
-	drawText(10,280,"Press c to create a cube",DrawingContext,"#000000","left");			
-	drawText(10,300,"Press m to create a sphere",DrawingContext,"#000000","left");	
-	drawText(10,320,"Press n to create waves",DrawingContext,"#000000","left");		
+	// drawText(10,60,"Press v to toggle perspective",DrawingContext,"#000000","left");
+	// drawText(10,80,"Press 4 / 6 to rotate around X-Axis",DrawingContext,"#000000","left");
+	// drawText(10,100,"Press 2 / 8 to rotate around Y-Axis",DrawingContext,"#000000","left");
+	// drawText(10,120,"Press 1 / 9 to rotate around Z-Axis",DrawingContext,"#000000","left");
+	// drawText(10,140,"Press <page up> / <page down> to increase / decrease the number of segments",DrawingContext,"#000000","left"); 
+	// drawText(10,160,"Press d to change drawing method from <color with lines> to <color without lines> to <hidden line> and to <wireframe>",DrawingContext,"#000000","left");  
+	// drawText(10,180,"Press r to start RayTracing calculation",DrawingContext,"#000000","left");
+	// drawText(10,200,"Press q to toggle the resolution",DrawingContext,"#000000","left");
+	// drawText(10,220,"Press s to save a screenshot",DrawingContext,"#000000","left");
+	// drawText(10,240,"Press k to save the current scene",DrawingContext,"#000000","left");	
+	// drawText(10,260,"Press l to load the saved scene",DrawingContext,"#000000","left");		
+	// drawText(10,280,"Press c to create a cube",DrawingContext,"#000000","left");			
+	// drawText(10,300,"Press m to create a sphere",DrawingContext,"#000000","left");	
+	// drawText(10,320,"Press n to create waves",DrawingContext,"#000000","left");		
 	
 	var TempPointX = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
 	var TempPointY = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
@@ -600,7 +600,7 @@ function SaveObject()
 		localStorage.setItem("AngleY", JSON.stringify(AngleY));
 		localStorage.setItem("AngleZ", JSON.stringify(AngleZ));
 		localStorage.setItem("Perspective", JSON.stringify(Perspective));
-		alert("3D-Object saved");
+		document.title = "3D-Object saved";
 	}
 	else {alert("Sorry, your browser is too old to save data");}
 }
@@ -623,7 +623,7 @@ function LoadObject()
 		CreateRotationObject();
 		window.removeEventListener('mousemove',mousemoveevent); 
 		window.removeEventListener('mousedown',mousedownevent); 		
-		alert("3D-Object loaded"); 
+		document.title = "3D-Object loaded"; 
 	}
 	else {alert("Sorry, your browser is too old to save data");}
 }
@@ -689,4 +689,11 @@ function CreateWaves()
 	window.removeEventListener('mousemove',mousemoveevent); 
 	window.removeEventListener('mousedown',mousedownevent); 		
 }
+
+var SimulateKeyEvent = function (KeyNb) {
+	var event = new Event('keydown',{'key':'4'});
+	document.body.dispatchEvent(event);
+	const input = document.getElementsByTagName("body")[0];
+	input.dispatchEvent(new KeyboardEvent('keydown',{'key':'4'}));
+};
 
