@@ -219,6 +219,15 @@ function keydownevent(event)
 		case 76: // "l" key
 			LoadObject();
 			break;
+		case 67: // "c" key 
+			CreateCube();
+			break;			
+		case 77: // "m" key
+			CreateSphere();
+			break;			
+		case 78: // "n" key
+			CreateWaves();
+			break;
 		case 32: // "space" key
 			KeyPressed = 1; 
 			CheckIfAllPointsWereEntered();
@@ -335,6 +344,9 @@ function Show3dObject()
 	drawText(10,220,"Press s to save a screenshot",DrawingContext,"#000000","left");
 	drawText(10,240,"Press k to save the current scene",DrawingContext,"#000000","left");	
 	drawText(10,260,"Press l to load the saved scene",DrawingContext,"#000000","left");		
+	drawText(10,280,"Press c to create a cube",DrawingContext,"#000000","left");			
+	drawText(10,300,"Press m to create a sphere",DrawingContext,"#000000","left");	
+	drawText(10,300,"Press n to create waves",DrawingContext,"#000000","left");		
 	
 	var TempPointX = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
 	var TempPointY = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
@@ -616,9 +628,65 @@ function LoadObject()
 	else {alert("Sorry, your browser is too old to save data");}
 }
 
+function CreateCube()
+{
+	NumberOfRotationSegments = 4;
+	TotalEnteredPoints = 4;
+	
+    PointCoordinatesArray.items[0][0] = 0;
+    PointCoordinatesArray.items[0][1] = -height*0.2; 
+    
+    PointCoordinatesArray.items[1][0] = -width*0.2;
+    PointCoordinatesArray.items[1][1] = -height*0.2;
 
+    PointCoordinatesArray.items[2][0] = -width*0.2;
+    PointCoordinatesArray.items[2][1] = height*0.2;    
 
+    PointCoordinatesArray.items[3][0] = 0;
+    PointCoordinatesArray.items[3][1] = height*0.2;    
 
+	clearScreen();
+	CreateRotationObject();
+	window.removeEventListener('mousemove',mousemoveevent); 
+	window.removeEventListener('mousedown',mousedownevent); 		
+}
 
+function CreateSphere()
+{
+	var NbrOfSegments = 50;
+    for (SegmentNo = 0; SegmentNo < NbrOfSegments; SegmentNo++)
+    {
+        PointCoordinatesArray.items[SegmentNo][0] = Math.sin((SegmentNo * (180/NbrOfSegments))/360*2*Math.PI)*150; 
+        PointCoordinatesArray.items[SegmentNo][1] = Math.cos((SegmentNo * (180/NbrOfSegments))/360*2*Math.PI)*150;
+    }
 
+	NumberOfRotationSegments = NbrOfSegments;
+	TotalEnteredPoints = NbrOfSegments;
+	
+	clearScreen();
+	CreateRotationObject();
+	window.removeEventListener('mousemove',mousemoveevent); 
+	window.removeEventListener('mousedown',mousedownevent); 		
+}
+
+function CreateWaves()
+{
+    var NbrOfWaves = 5;
+    var NbrOfSegments = 30;
+    var counter=0;
+    for (SegmentNo = 0; SegmentNo < 2*Math.PI*NbrOfWaves; SegmentNo = SegmentNo + 2*Math.PI*NbrOfWaves/NbrOfSegments)
+    {
+        PointCoordinatesArray.items[counter][0] = width/(2*Math.PI*NbrOfWaves)*SegmentNo; 
+        PointCoordinatesArray.items[counter][1] = Math.sin(SegmentNo)*Math.exp(-SegmentNo/10)*height/5;
+        counter++;
+    }
+
+    NumberOfRotationSegments = NbrOfSegments;
+    TotalEnteredPoints = NbrOfSegments;
+	
+	clearScreen();
+	CreateRotationObject();
+	window.removeEventListener('mousemove',mousemoveevent); 
+	window.removeEventListener('mousedown',mousedownevent); 		
+}
 
