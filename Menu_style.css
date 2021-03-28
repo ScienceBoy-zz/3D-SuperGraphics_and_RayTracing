@@ -1,0 +1,221 @@
+/*  Source: https://wiki.selfhtml.org/wiki/JavaScript/Tutorials/zug%C3%A4ngliche_Dropdown-Navigation under license: CC-BY-SA 3.0 (de). */
+
+
+body { margin-top: 3.5em; }
+
+#skip-link { 
+	position: absolute; 
+	left: 0; top: 0; 
+	background: black; 
+	color: white; padding: 0.25em; 
+	transform: translateY(-100%); 
+	transition: 0.2s transform; 
+	z-index: 1001;
+} 
+#skip-link:focus { 
+	transform: translateY(0);
+}			
+
+.visually-hidden { 
+	position: absolute !important; 
+	clip: rect(1px, 1px, 1px, 1px) !important; 
+	padding: 0 !important; 
+	border: 0 !important; 
+	height: 1px !important; 
+	width: 1px !important; 
+	overflow: hidden !important; 
+	white-space: nowrap !important;
+}
+
+#sitenav *, 
+#sitenav a { 
+	background-color: lightgray; 
+	color: black;
+}
+
+#sitenav.withjs { 
+	position: absolute;
+}
+#sitenav.withjs ul { 
+	position: absolute;
+}
+
+#sitenav { 
+	top: 1em; 
+	left: 2em;
+}
+#sitenav.wide { 
+	top: 0; 
+	left: 2em; 
+	right: 2em; 
+	max-width: 58em;
+}
+
+#sitenav > details { 
+	max-width: 
+	-webkit-max-content; 
+	max-width: -moz-max-content; 
+	max-width: max-content;
+}
+#sitenav > details { 
+	padding: .2em;
+}
+#sitenav.wide > details {
+	padding: 0; 
+} 
+#sitenav ul { 
+	margin:0; 
+	padding-top:.2em; 
+	padding-left:1em; 
+	padding-right:1em;
+}
+#sitenav ul ul { 
+	margin-left: 7em; 
+	margin-top: -3.1em; 
+	padding-left: .1em; 
+}
+#sitenav.wide ul { 
+	margin:0; 
+	padding-top:.2em; 
+	padding-left:0; 
+	padding-right:0; 
+}
+#sitenav.wide ul ul { 
+	margin-left: -.5em; 
+	margin-top: -.1em; 
+	padding-left: .5em; 
+	padding-right: .5em; 
+}
+#sitenav.wide ul ul ul { 
+	margin-left: 7em; 
+	margin-top: -3.1em; 
+	padding-left: .1em; 
+}
+
+#sitenav li a { 
+	display: inline-block; 
+	margin-top:.1em; 
+	margin-bottom:.1em; 
+}
+#sitenav li a, 
+#sitenav li summary { 
+	padding: .5em; 
+	margin: .3em; 
+	line-height: 1.4em; 
+}
+#sitenav li { 
+	padding: 0em; 
+	white-space: nowrap; 
+	vertical-align: middle; 
+}
+#sitenav > details > ul { 
+	margin-left: -.5em; 
+	margin-top: .3em; 
+}
+
+#sitenav.wide > details > ul,
+#sitenav.wide > details > ul > li { 
+	display: inline-block; 
+}
+#sitenav.wide > details > ul { 
+	width: 100%; 
+	box-sizing: border-box; 
+}
+#sitenav.wide > details > ul { 
+	margin-left: 0; 
+	margin-top: 0; 
+	border-radius: 0; }
+
+#sitenav summary::-webkit-details-marker { 
+	display: none; 
+}
+#sitenav summary { 
+	list-style-type: none; 
+}
+#sitenav details summary::after { 
+	font-family: arial_unicode_ms; 
+	vertical-align: top; 
+}
+#sitenav ul details:not([open]) > summary::after { 
+	content: ' ►'; 
+}
+#sitenav ul details[open] > summary::after { 
+	content: ' ◄'; 
+}
+#sitenav > details:not([open]) > summary::before { 
+	content: "☰"; 
+	font-size: 0.9em; 
+} 
+#sitenav > details[open] > summary::before { 
+	content: "× [ESC] to close "; 
+	font-size: 1.0em; 
+} 
+#sitenav.wide details[open] details:not([open]) summary::after { 
+	content: ' ▼'; 
+}
+#sitenav.wide details[open] details[open] summary::after { 
+	content: ' ▲'; 
+}
+#sitenav.wide details[open] details[open] details:not([open]) summary::after { 
+	content: ' ►'; 
+}
+#sitenav.wide details[open] details[open] details[open] summary::after { 
+	content: ' ◄'; 
+}
+html.no-details #sitenav ul summary::before { 
+	content: ""; 
+	width: 0; 
+} 
+
+#sitenav li[aria-current] a[href='#']::before { 
+	content: "► "; 
+	font-family: arial_unicode_ms;
+}
+#sitenav.withjs > details > ul > li[aria-current] > details > summary { 
+	border-left: 2px solid black; 
+}
+#sitenav.withjs > details > ul > li[aria-current] > details > ul > li[aria-current] > details > summary { 
+	border-left: 2px solid black; 
+}
+#sitenav.wide > details > ul > li[aria-current] > details > summary { 
+	border-left: none; 
+}
+#sitenav.wide > details > ul > li[aria-current] { 
+	border-bottom: 2px solid black; 
+}
+
+#sitenav summary { 
+	cursor: pointer; 
+	max-width: -webkit-max-content; 
+	max-width: -moz-max-content; 
+	max-width: max-content; 
+	max-height: 1.4em; 
+}
+#sitenav ul { 
+	list-style-type: none; 
+	border-radius: .5em; 
+}
+#sitenav.wide ul ul { 
+	border-radius: 0 0 .5em .5em;
+}
+#sitenav > details { 
+	border: 1px solid black; 
+	border-radius: .2em; 
+}
+#sitenav.wide > details { 
+	border: none; 
+	border-radius: 0; 
+} 
+#sitenav li a { 
+	text-decoration: none; 
+}
+#sitenav li a, 
+#sitenav li summary { 
+	outline: none; 
+}
+#sitenav li a:hover, 
+#sitenav li summary:hover, 
+#sitenav li a:focus, 
+#sitenav li summary:focus { 
+	outline: 1px solid #5050ff; 
+}
