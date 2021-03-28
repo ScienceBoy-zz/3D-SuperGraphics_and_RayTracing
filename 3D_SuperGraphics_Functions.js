@@ -346,7 +346,7 @@ function Show3dObject()
 	drawText(10,260,"Press l to load the saved scene",DrawingContext,"#000000","left");		
 	drawText(10,280,"Press c to create a cube",DrawingContext,"#000000","left");			
 	drawText(10,300,"Press m to create a sphere",DrawingContext,"#000000","left");	
-	drawText(10,300,"Press n to create waves",DrawingContext,"#000000","left");		
+	drawText(10,320,"Press n to create waves",DrawingContext,"#000000","left");		
 	
 	var TempPointX = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
 	var TempPointY = new Array2D(MaxNbOfRotSegments,MaxNumberOfPoints); 
