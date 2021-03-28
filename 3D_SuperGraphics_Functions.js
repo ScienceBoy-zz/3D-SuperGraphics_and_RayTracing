@@ -690,10 +690,4 @@ function CreateWaves()
 	window.removeEventListener('mousedown',mousedownevent); 		
 }
 
-var SimulateKeyEvent = function (KeyNb) {
-	var event = new Event('keydown',{'key':'4'});
-	document.body.dispatchEvent(event);
-	const input = document.getElementsByTagName("body")[0];
-	input.dispatchEvent(new KeyboardEvent('keydown',{'key':'4'}));
-};
 
