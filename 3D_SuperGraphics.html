@@ -1,3 +1,16 @@
+<!-- Latest Major Changes: -->
+<!-- v1.00 26.03.2021 Complete program after completion of all chapters for Udemy Online Course -->
+<!-- v1.01 26.03.2021 Added "Quick & Dirty" calculation, toggelled via key "q" -->
+<!-- v1.02 26.03.2021 Added Screenshot function, and removed -finally- the button "Clear Screen" -->
+<!-- v1.03 27.03.2021 Moved light source further away for large monitors with high resolution -->
+<!-- v1.04 27.03.2021 Removed event listener for mouse after loading a previously saved scene -->
+<!-- v1.05 27.03.2021 Corrected CalculateAngleBetweenNormalAndLightSource to avoid wrong direction of normal vector in some cases -->
+<!-- v1.06 27.03.2021 Added-local-Save-&-Load-functions -->
+<!-- v1.07 28.03.2021 Introduction of predefined objects like cube, sphere, waves -->
+<!-- v1.08 28.03.2021 Added menu functionality -->
+<!-- v1.09 28.03.2021 Enabled keydown events and showaxes as EnterNewPoints function was disabled for menu -->
+<!-- v1.10 07.05.2021 Improved speed by calculating reflection and refraction only if influence of those are larger than a specific level (not yet uploaded to github) -->
+
 <!Doctype html>
 <html>
 	<head>
@@ -155,15 +168,18 @@
 			var StandardResolution = 1;
 			var Resolution = StandardResolution;
 			
-			var PartOfDirectLight     = 0.8;
-			var PartOfReflectlight 	  = 0.1;
+			var PartOfDirectLight     = 0.8;  
+			var PartOfReflectlight 	  = 0.1; 
 			var PartOfRefractionlight = 0.0;
 			var PartSurrounding       = 0.1;
+			
+			var LevelOfInfluence = 0.05; // Below this level, call for new light ray shall not be executed anymore
 			
 			var ColorOfObject = {Red:0/255, Green:50/255, Blue:255/255,};
 			var ColorOfLightSource = {Red:255/255, Green:255/255, Blue:255/255,};
 			
 			var docTitle = 0;
+			var StartTime = 0;
 			
 			var RefractiveIndexOfMaterial = 1.5; //Quartz = 1.46 / Window Glass = 1.54 / Air = 1.00 / Water = 1.33 / Diamond = 2.42
 			var SurfaceStructur = 20; 
@@ -171,7 +187,7 @@
 			//EnterNewPoints();  
 			window.addEventListener('keydown', keydownevent); 
 			ShowAxesAndEnteredPoints();
-			
+			 
 			//RayTracing();
 			
 			function RayTracing() 
@@ -238,7 +254,19 @@
 					}
 					
 					var ReflectLight      = CalculateReflection(OriginX, OriginY, OriginZ, AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, AreaHitByLightRay.ObjectNo);
-					var ColorReflectLight = CalculateColorOfPointByRayTracing(AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, ReflectLight.DirectionX, ReflectLight.DirectionY, ReflectLight.DirectionZ, RecursionDepth+1, RefractiveIndexInCurrentMedium);
+					if (Math.pow(PartOfReflectlight,RecursionDepth) > LevelOfInfluence)
+					{
+						var ColorReflectLight = CalculateColorOfPointByRayTracing(AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, ReflectLight.DirectionX, ReflectLight.DirectionY, ReflectLight.DirectionZ, RecursionDepth+1, RefractiveIndexInCurrentMedium);
+					}	
+					else
+					{
+						var ColorReflectLight = 
+						{ 
+							Red: 0, 
+							Green: 0, 
+							Blue: 0, 
+						}
+					}
 					
 					if (AreaHitByShadowLightRay.ObjectNo < 0)
 					{
@@ -264,7 +292,7 @@
 					}
 					
 					var RefractionLight      = CalculateRefraction(OriginX, OriginY, OriginZ, AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, AreaHitByLightRay.ObjectNo, RefractiveIndexInCurrentMedium, RefractiveIndexInNewMedium);
-					if (RefractionLight.TotalReflection == false)
+					if (RefractionLight.TotalReflection == false && Math.pow(PartOfRefractionlight,RecursionDepth) > LevelOfInfluence)
 					{
 						var ColorRefractionLight = CalculateColorOfPointByRayTracing(AreaHitByLightRay.IntersectionPointX, AreaHitByLightRay.IntersectionPointY, AreaHitByLightRay.IntersectionPointZ, RefractionLight.DirectionX, RefractionLight.DirectionY, RefractionLight.DirectionZ, RecursionDepth+1, RefractiveIndexInNewMedium);
 					}
@@ -507,11 +535,3 @@
 		<a id='link'></a>
 	</body>
 </html>
-
-
-
-
-
-
-
-
