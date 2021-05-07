@@ -1,3 +1,7 @@
+// Latest Major Changes:
+// v1.00 26.03.2021 Complete program after completion of all chapters for Udemy Online Course
+// v1.01 07.05.2021 Added elapsed time calculation (not yet uploaded to github)
+
 function drawLine(x1,y1,x2,y2,thickness,DrawingContext,color) 
 { 
 	DrawingContext.beginPath();  
@@ -195,9 +199,9 @@ function keydownevent(event)
 			Show3dObject(); 
 			break;
 		case 82: // "r" key
-			setTimeout(function() {document.title = "Starting calculation...";},0);
+			setTimeout(function() {document.title = "Starting calculation..."; var tempTime = new Date(); StartTime = tempTime.getTime()},0);
 			RayTracing();
-			setTimeout(function() {document.title = "Calculation finished."; docTitle = 0;},0);
+			setTimeout(function() {var tempTime = new Date(); document.title = "Calculation finished. ("+((tempTime.getTime()-StartTime)/1000)+"s)"; docTitle = 0;},0);
 			break;
 		case 81: // "q"	key
 			if (Resolution < StandardResolution*100) 
@@ -689,5 +693,4 @@ function CreateWaves()
 	window.removeEventListener('mousemove',mousemoveevent); 
 	window.removeEventListener('mousedown',mousedownevent); 		
 }
-
 
