@@ -10,7 +10,6 @@
 <!-- v1.08 28.03.2021 Added menu functionality -->
 <!-- v1.09 28.03.2021 Enabled keydown events and showaxes as EnterNewPoints function was disabled for menu -->
 <!-- v1.10 07.05.2021 Improved speed by calculating reflection and refraction only if influence of those are larger than a specific level (not yet uploaded to github) -->
-<!-- v1.11 07.05.2021 Improved speed by pre-calculating constants for areas  -->
 
 <!Doctype html>
 <html>
@@ -99,7 +98,7 @@
 							</ul>
 						</details>
 					</li>
-					<li><a href="#" onclick="setTimeout(function() {document.title = 'Starting calculation...';},0); RayTracing(); setTimeout(function() {document.title = 'Calculation finished.'; docTitle = 0;},0); return false;">Calculate RayTracing [r]</a></li>
+					<li><a href="#" onclick="RayTracingStart(); return false;">Calculate RayTracing [r]</a></li>
 				</ul>
 			</details>
 		</nav>
@@ -137,7 +136,6 @@
 			var maxarea = MaxNumberOfPoints * MaxNbOfRotSegments;
 			var Area = new Array3D(maxarea, 4, 3);
 			var AreaConstants = new Array1D(maxarea);
-			var AreaConstantsSet = new Array1D(maxarea);
 			var AreaIndex = 0;
 			
 			var AreaZValues = new Array1D(maxarea); 
@@ -210,7 +208,9 @@
 					if (docTitle < parseInt(100/width*((x-Resolution)+width/2)))
 					{
 						docTitle = parseInt(100/width*((x-Resolution)+width/2));
-						document.title = docTitle+"%";
+						var tempTime = new Date(); 
+						var tempDone = (tempTime.getTime()-StartTime)/1000;
+						document.title = docTitle+"% ("+parseInt((100-docTitle)/docTitle*tempDone)+"s to go)";
 					}
 					var OriginX = x;    var OriginY = y;    var OriginZ = -10000; 
 					var TargetX = x;    var TargetY = y;    var TargetZ = 10000;
@@ -371,45 +371,11 @@
 				var IntersectionPointX = 1e6; 
 				var IntersectionPointY = 1e6; 
 				var IntersectionPointZ = 1e6; 
-				
-				if (AreaConstantsSet.items[i] != true)
-				{					
-					var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2];
-					var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2];
-					var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2];
-					
-					var a = +(By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az); 
-					var b = -(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az);
-					var c = +(Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay);
-					var d = -(Cy*Az*Bx + Cz*Ax*By + Cx*Ay*Bz - Cz*Ay*Bx - Cx*Az*By - Cy*Ax*Bz);
-					
-					var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
-					var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
-					var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
-				
-					AreaConstants.items[i] = 
-					{
-						a: a,
-						b: b,
-						c: c,
-						d: d,
-						nx: nx,
-						ny: ny,
-						nz: nz,
-					};
-					AreaConstantsSet.items[i] = true;
-				}
-				else
-				{
-					var a = AreaConstants.items[i].a;
-					var b = AreaConstants.items[i].b;
-					var c = AreaConstants.items[i].c;
-					var d = AreaConstants.items[i].d;
-					var nx = AreaConstants.items[i].nx;
-					var ny = AreaConstants.items[i].ny;
-					var nz = AreaConstants.items[i].nz;
-				}
-					
+
+				var a = AreaConstants.items[i].a;
+				var b = AreaConstants.items[i].b;
+				var c = AreaConstants.items[i].c;
+				var d = AreaConstants.items[i].d;
 				
 				var ScalarProduct =  DirectionX * a + DirectionY * b + DirectionZ * c; 
 				
@@ -471,24 +437,9 @@
 			
 			function CalculateReflection(OriginX, OriginY, OriginZ, IntersectionPointX, IntersectionPointY, IntersectionPointZ, i) 
 			{ 
-				if (AreaConstantsSet.items[i] == true)
-				{
-					var nx = AreaConstants.items[i].nx;
-					var ny = AreaConstants.items[i].ny;
-					var nz = AreaConstants.items[i].nz;
-				}	
-				else
-				{	
-					console.log("Konstanten sind komischerweise nicht gesetzt");
-					
-					var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2]; 
-					var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2]; 
-					var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2]; 
-					
-					var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
-					var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
-					var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
-				}
+				var nx = AreaConstants.items[i].nx;
+				var ny = AreaConstants.items[i].ny;
+				var nz = AreaConstants.items[i].nz;
 					
 				var Factor  = (nx * (OriginX - IntersectionPointX) + ny * (OriginY - IntersectionPointY) + nz * (OriginZ - IntersectionPointZ)) / (nx*nx + ny*ny + nz*nz);
 				var Qx = 2 * nx * Factor + 2 * IntersectionPointX - OriginX; 
@@ -504,24 +455,9 @@
 			
 			function CalculateRefraction(OriginX, OriginY, OriginZ, IntersectionPointX, IntersectionPointY, IntersectionPointZ, i, RefractiveIndexInCurrentMedium, RefractiveIndexInNewMaterial)
 			{
-				if (AreaConstantsSet.items[i] == true)
-				{
-					var nx = AreaConstants.items[i].nx;
-					var ny = AreaConstants.items[i].ny;
-					var nz = AreaConstants.items[i].nz;
-				}	
-				else
-				{	
-					console.log("Konstanten sind komischerweise nicht gesetzt");
-
-					var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2]; 
-					var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2]; 
-					var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2]; 
-		
-					var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
-					var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
-					var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 					
-				}
+				var nx = AreaConstants.items[i].nx;
+				var ny = AreaConstants.items[i].ny;
+				var nz = AreaConstants.items[i].nz;
 				
 				var Factor  = (nx * (OriginX - IntersectionPointX) + ny * (OriginY - IntersectionPointY) + nz * (OriginZ - IntersectionPointZ)) / (nx*nx + ny*ny + nz*nz);
 				var Qx = 2 * nx * Factor + 2 * IntersectionPointX - OriginX; 
@@ -572,33 +508,55 @@
 
 			function CalculateAngleBetweenNormalAndLightSource(IntersectionPointX, IntersectionPointY, IntersectionPointZ, LightSourceX, LightSourceY, LightSourceZ, i)
 			{
-				if (AreaConstantsSet.items[i] == true)
-				{
-					var nx = AreaConstants.items[i].nx;
-					var ny = AreaConstants.items[i].ny;
-					var nz = AreaConstants.items[i].nz;
-				}	
-				else
-				{	
-					console.log("Konstanten sind komischerweise nicht gesetzt");
-
-					var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2]; 
-					var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2]; 
-					var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2]; 
-		
-					var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
-					var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
-					var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 					
-				}
+				var nx = AreaConstants.items[i].nx;
+				var ny = AreaConstants.items[i].ny;
+				var nz = AreaConstants.items[i].nz;
 				
 				var TempAngle = AngleBetweenVectors(nx,ny,nz, LightSourceX-IntersectionPointX, LightSourceY-IntersectionPointY, LightSourceZ-IntersectionPointZ); 
 				if (TempAngle > Math.PI/2) {nx = -nx; ny = -ny; nz = -nz;} 
 				return AngleBetweenVectors(nx,ny,nz, LightSourceX-IntersectionPointX, LightSourceY-IntersectionPointY, LightSourceZ-IntersectionPointZ);
 			}
 			
+			function PrepareConstants()
+			{
+				for (var i = 0; i < maxarea; i++)
+				{
+					var Ax = Area.items[i][0][0]; var Ay = Area.items[i][0][1]; var Az = Area.items[i][0][2];
+					var Bx = Area.items[i][1][0]; var By = Area.items[i][1][1]; var Bz = Area.items[i][1][2];
+					var Cx = Area.items[i][2][0]; var Cy = Area.items[i][2][1]; var Cz = Area.items[i][2][2];
 					
+					var a = +(By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az); 
+					var b = -(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az);
+					var c = +(Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay);
+					var d = -(Cy*Az*Bx + Cz*Ax*By + Cx*Ay*Bz - Cz*Ay*Bx - Cx*Az*By - Cy*Ax*Bz);
+					
+					var nx = ((By-Ay)*(Cz-Az)-(Cy-Ay)*(Bz-Az)); 
+					var ny = (-(Bx-Ax)*(Cz-Az)+(Cx-Ax)*(Bz-Az)); 
+					var nz = ((Bx-Ax)*(Cy-Ay)-(Cx-Ax)*(By-Ay)); 
+				
+					AreaConstants.items[i] = 
+					{
+						a: a,
+						b: b,
+						c: c,
+						d: d,
+						nx: nx,
+						ny: ny,
+						nz: nz,
+					};
+				}
+			}
+			
+			
 		</script>
 		<a id='link'></a>
 	</body>
 </html>
+
+
+
+
+
+
+
 
